@@ -91,7 +91,7 @@ def index():
 
 @app.route('/add', methods=['POST'])
 def add():
-    name = request.form['name']
+    name = request.form['name'].upper()
     lat = request.form['lat']
     lon = request.form['lon']
 
