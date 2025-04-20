@@ -89,6 +89,7 @@
 
         .form-container {
             margin-top: 40px;
+            display: none; /* Escondido por padrão */
         }
 
         form {
@@ -153,7 +154,11 @@
             {% endfor %}
         </ul>
 
-        <div class="form-container">
+        <!-- Botão para mostrar o formulário -->
+        <button id="addLocationBtn">Adicionar Novo Local</button>
+
+        <!-- Formulário escondido inicialmente -->
+        <div class="form-container" id="formContainer">
             <h3>Adicionar Novo Local</h3>
             <form method="POST" action="/add">
                 <input type="text" name="name" placeholder="Nome do Local" required>
@@ -165,6 +170,13 @@
     </div>
 
     <script>
+        // Mostrar ou esconder o formulário ao clicar no botão
+        document.getElementById('addLocationBtn').addEventListener('click', function() {
+            const formContainer = document.getElementById('formContainer');
+            formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Validação de latitude e longitude no formulário
         document.querySelector("form").addEventListener("submit", function (e) {
             const latField = document.querySelector('input[name="lat"]');
             const lonField = document.querySelector('input[name="lon"]');
@@ -186,6 +198,7 @@
             }
         });
 
+        // Função para filtrar a lista de locais
         function filterList() {
             const input = document.getElementById('searchInput');
             const filter = input.value.toLowerCase();
