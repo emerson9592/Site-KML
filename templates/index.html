@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Locais do KML</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #333;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .developer-info {
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .developer-info a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 8px 0;
+            padding: 10px;
+            background: #eef2f5;
+            border-radius: var(--border-radius);
+            transition: background 0.3s ease;
+        }
+
+        li:hover {
+            background: #dde6ee;
+        }
+
+        a {
+            color: var(--primary-color);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .form-container {
+            margin-top: 40px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+
+        button {
+            padding: 12px;
+            font-size: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Informações sobre os desenvolvedores -->
+        <div class="developer-info">
+            Desenvolvido por <a href="https://wa.me/5511984331704?text=Olá%20tudo%20bem%3F">Emerson Pereira</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul style="padding: 0; list-style: none;">
+                    {% for category, message in messages %}
+                        <li style="padding: 10px; margin-bottom: 10px; border-radius: 8px; background-color: {{ 'lightgreen' if category == 'success' else '#f8d7da' }};">
+                            {{ message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <h2>Pesquise por siglas de sites ou centrais</h2>
+
+        <input type="text" id="searchInput" placeholder="Buscar local..." onkeyup="filterList()">
+
+        <ul id="placeList">
+            {% for place in places %}
+                <li>
+                    <a href="https://www.google.com/maps/search/?api=1&query={{ place.lat | replace('+', '%2B') }}{% if place.lon %},{{ place.lon }}{% endif %}" target="_blank">
+                        {{ place.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="form-container">
+            <h3>Adicionar Novo Local</h3>
+            <form method="POST" action="/add">
+                <input type="text" name="name" placeholder="Nome do Local" required>
+                <input type="text" name="lat" placeholder="Latitude ou Plus Code" required>
+                <input type="text" name="lon" placeholder="Longitude (deixe vazio se usar Plus Code)">
+                <button type="submit">Adicionar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.querySelector("form").addEventListener("submit", function (e) {
+            const latField = document.querySelector('input[name="lat"]');
+            const lonField = document.querySelector('input[name="lon"]');
+
+            const lat = latField.value.trim();
+            const lon = lonField.value.trim();
+
+            // Verifica se é Plus Code (contém "+")
+            if (lat.includes("+") && lon === "") {
+                return; // OK, é Plus Code
+            }
+
+            const latNum = parseFloat(lat);
+            const lonNum = parseFloat(lon);
+
+            if (isNaN(latNum) || isNaN(lonNum) || latNum < -90 || latNum > 90 || lonNum < -180 || lonNum > 180) {
+                alert("Latitude ou longitude inválida. Verifique os valores.");
+                e.preventDefault();
+            }
+        });
+
+        function filterList() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const ul = document.getElementById("placeList");
+            const li = ul.getElementsByTagName('li');
+
+            for (let i = 0; i < li.length; i++) {
+                const a = li[i].getElementsByTagName("a")[0];
+                const txtValue = a.textContent || a.innerText;
+                li[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
+            }
+        }
+    </script>
+</body>
+</html>
